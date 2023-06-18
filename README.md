@@ -15,3 +15,13 @@ Let's try the handler way.
 ## Handler
 
 First let's create a custom handler which implements the slog.Handler interface.
+Handler will embed an observer and pass it each slog.Record from slog.Logger.
+Observer must implement a RecordCollector interface to receive those records.
+
+## Observer
+
+Must be a pointer (adding records to it).
+It's API should provide the number of captured logs and a getter for a log
+by its index in the collection (order of logs capture)
+
+TODO: implement API
