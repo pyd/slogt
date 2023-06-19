@@ -24,4 +24,8 @@ Must be a pointer (adding records to it).
 It's API should provide the number of captured logs and a getter for a log
 by its index in the collection (order of logs capture)
 
-TODO: implement API
+## Log
+
+Represents a log
+
+TODO: wrap the slog.Record api for time, level and message; implement a log attribute finder

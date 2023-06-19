@@ -10,10 +10,17 @@ import (
 	"github.com/pyd/slogt"
 )
 
+/*
+Testing slogt.ObserverHandler
+
+Note: no need to check that the slogt.ObserverHandler.Handle() method
+is passing each slog.Record from the Logger to the observer as long as
+the observer tests run as expected
+*/
+
 var _ = Describe("Handler", func() {
 
-	// var handler slog.Handler
-
+	// there are 2 constructors: NewObserverHandler(handler, observer) & NewDefaultObserverHandler(observer)
 	Describe("Constructors", func() {
 
 		var handlerArg slog.Handler
@@ -21,12 +28,13 @@ var _ = Describe("Handler", func() {
 		var constructorErr error
 
 		BeforeEach(func() {
-			// set not nil args by default; overwrite with nil in sub BeforeEach
+			// by default constructor arguments are not nil
+			// nil argiumetns for testing will be set in sub BeforeEach's
 			handlerArg = slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})
 			observerArg = new(slogt.Observer)
 		})
 
-		Context("With handler and observer arguments", func() {
+		Context("First constructor, with handler and observer arguments", func() {
 
 			JustBeforeEach(func() {
 				_, constructorErr = slogt.NewObserverHandler(handlerArg, observerArg)
@@ -65,7 +73,7 @@ var _ = Describe("Handler", func() {
 			})
 		})
 
-		Context("With observer argument only (default handler)", func() {
+		Context("Second constructor, with observer argument only (default handler)", func() {
 
 			JustBeforeEach(func() {
 				_, constructorErr = slogt.NewDefaultObserverHandler(observerArg)
@@ -93,5 +101,4 @@ var _ = Describe("Handler", func() {
 		})
 
 	})
-
 })
