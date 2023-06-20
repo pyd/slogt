@@ -22,10 +22,20 @@ Observer must implement a RecordCollector interface to receive those records.
 
 Must be a pointer (adding records to it).
 It's API should provide the number of captured logs and a getter for a log
-by its index in the collection (order of logs capture)
+by its index in the collection (chronological order of logs capture)
 
 ## Log
 
 Represents a log
+The log.go.archive file has a different implementation of the FindAttribute() method.
+Less readable than the final version, I keep it for the recursive findAttributeInGroup() method
+that may be useful for future evolutions.
+ 
+TODO: it may be useful to know if a group attribute has the expected keys ?
 
-TODO: wrap the slog.Record api for time, level and message; implement a log attribute finder
+e.g. log.HasAttributesInGroup(groupAttributeKey, keys ...string) found bool, error
+e.g. log.HasAttributesInGroup("user.profile", "age", admin") found bool, error
+errors: groupAttribute not found
+        subAttributes ["age"] not found
+
+TODO: remove methods implementations in ObserverHandler
