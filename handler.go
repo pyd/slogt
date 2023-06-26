@@ -22,7 +22,7 @@ We need to capture and store them (see WithGroup() and WithAttrs()).
 // An observer must implement this interface to be accepted by the ObserverHandler.
 // see ObserverHandler.Handle()
 type HandlerObserver interface {
-	addLog(record slog.Record, groups []string, attrs []slog.Attr)
+	addLog(log Log)
 }
 
 type ObserverHandler struct {
@@ -67,11 +67,12 @@ func (oh ObserverHandler) Handle(ctx context.Context, record slog.Record) error 
 	if err := oh.handler.Handle(ctx, record); err != nil {
 		return err
 	}
-	oh.observer.addLog(record, oh.groups, oh.attrs)
+	log := NewLog(record, oh)
+	oh.observer.addLog(log)
 	return nil
 }
 
-// return a new ObserverHandler (after type assertion) with additional shared attributes
+// return a new ObserverHandler (type assertion) with additional shared attributes
 func (oh ObserverHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 
 	newHandler := oh.handler.WithAttrs(attrs)
@@ -84,7 +85,7 @@ func (oh ObserverHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 }
 
-// return a new ObserverHandler (after type assertion) with an additional group
+// return a new ObserverHandler (type assertion) with an additional group
 func (oh ObserverHandler) WithGroup(name string) slog.Handler {
 
 	// see slog.handler.go: func (h *commonHandler) withGroup(name string)

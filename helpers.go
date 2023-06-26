@@ -52,20 +52,6 @@ ext:
 	return attribute, found
 }
 
-// remove group names (joined by a dot) at the start of the given key
-// e.g. key = "app1.user.id" ang groups = ["app1"] will return "user.id"
-func (l Log) stripGroupNames(key string) string {
-
-	groups := joinKeys(l.groups)
-	index := strings.Index(key, groups)
-	if index == 0 {
-		// add one to remove the dot between app1 and user
-		key = key[len(groups)+1:]
-	}
-
-	return key
-}
-
 // split an attribute key with "."
 func splitKey(key string) []string {
 	return strings.Split(key, ".")

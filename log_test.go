@@ -116,7 +116,7 @@ var _ = Describe("The Log struct", func() {
 
 			log, logFound := observer.FindLog(1)
 			Expect(logFound).To(BeTrue())
-			attr, attrFound := log.FindBuiltInAttribute(key)
+			attr, attrFound := log.FindAttribute(key)
 
 			Expect(attrFound).To(Equal(attributeFound), fmt.Sprintf("attribute found should be %t", attributeFound))
 			Expect(attr.Value).To(Equal(attributeValue), fmt.Sprintf("attribute value should be %v", attributeValue))

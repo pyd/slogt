@@ -9,31 +9,9 @@ WARNING: slogt will fail finding an attribute if its Key has a dot e.g. "user.pr
 as it will consider it a 2 subkeys key !!!!
 A solution could be to provide a SetAttributeKeySeparator(separator string)
 
-// TODO refactor: add FindSharedAttribute() method in Handler
-
 // TODO add a method to clear logs in observer
 
-## usage:
-
-Instanciate the observer.  
-It will receive and store logs from the handler (you need a pointer) 
-
-    observer := new(slogt.Observer)
-    observer = &slogt.Observer{}
-
-Instantiate the handler which embed the observer
-
-    // an error is returned if the observer arg is nil
-    handler, _ := slogt.NewDefaultObserverHandler(observer)
-
-Instantiate the logger
-
-// Alternatively, if you want to pass your own embedded handler
-// var handler slogt.ObserverHandler
-// var embeddedHandler = slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})
-// var handler, _ = slogt.NewObserverHandler(embeddedHandler, observer)
-var logger = slog.New(handler)
-
+// TODO find a log by its - chronological - index may be difficult?
  
 TODO: it may be useful to know if a group attribute has the expected keys ?
 
@@ -41,8 +19,6 @@ e.g. log.HasAttributesInGroup(groupAttributeKey, keys ...string) found bool, err
 e.g. log.HasAttributesInGroup("user.profile", "age", admin") found bool, error
 errors: groupAttribute not found
         subAttributes ["age"] not found
-
-TODO: remove methods implementations in ObserverHandler
 
 TODO: check file, line when AddSOurce is set in config
 
