@@ -2,29 +2,30 @@ package slogt
 
 import "golang.org/x/exp/slog"
 
-// logs observer
-// store captured logs
-// implements the RecordCollector interface required by ObserverHandler
+/*
+The Observer stores captured logs
+*/
 type Observer struct {
-	records []slog.Record
+	logs []Log
 }
 
-// add a log in slog.Record format
-func (o *Observer) addRecord(record slog.Record) {
-	o.records = append(o.records, record)
+// add a log
+func (o *Observer) addLog(record slog.Record, groups []string, attrs []slog.Attr) {
+	log := NewLog(record, groups, attrs)
+	o.logs = append(o.logs, log)
 }
 
 // return the number of captured log(s)
 func (o *Observer) CountLogs() int {
-	return len(o.records)
+	return len(o.logs)
 }
 
 // find a log by its chronological index
 // if not found a zero-ed Log is returned
 func (o *Observer) FindLog(index int) (log Log, found bool) {
-	if index <= len(o.records) {
+	if index <= len(o.logs) {
 		found = true
-		log = Log{record: o.records[index-1]}
+		log = o.logs[index-1]
 	}
 	return log, found
 }

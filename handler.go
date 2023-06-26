@@ -8,55 +8,112 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-// ObserverHandler accepts an observer only if it implements this interface
+/*
+This is a custom slog.Handler.
+
+It is composed of a common Handler and an Observer.
+The common Handler helps implementing the slog.Handler interface without entirely rewriting its methods.
+The Observer will store each slog.Record passed by the Logger (see Handle()).
+
+The handler groups and attributes are not exposed by the common Handler.
+We need to capture and store them (see WithGroup() and WithAttrs()).
+*/
+
+// An observer must implement this interface to be accepted by the ObserverHandler.
 // see ObserverHandler.Handle()
-type RecordCollector interface {
-	addRecord(slog.Record)
+type HandlerObserver interface {
+	addLog(record slog.Record, groups []string, attrs []slog.Attr)
 }
 
-// a handler - implementing the slog.Handler interface - for the slog logger
-// additionally it provides logs received from the slog Logger to the observer
 type ObserverHandler struct {
-	slog.Handler
-	RecordCollector
+	handler  slog.Handler
+	observer HandlerObserver
+	// groups and shared attributes are not exposed by the common Handler
+	// we have to capture and store them here
+	groups []string
+	attrs  []slog.Attr
 }
 
-// ObserverHandler constructor
-// an error is returned if handler or observer arg is nil
-func NewObserverHandler(handler slog.Handler, observer RecordCollector) (ObserverHandler, error) {
+// Constructor
+// An error is returned if the handler or observer arg is nil.
+func NewObserverHandler(handler slog.Handler, observer HandlerObserver) (ObserverHandler, error) {
 	var err error
 	if handler == nil {
 		err = errors.New("handler passed to ObserverHandler constructor can not be nil")
 	} else if observer == nil {
 		err = errors.New("observer passed to ObserverHandler constructor can not be nil")
 	}
-	return ObserverHandler{handler, observer}, err
+	return ObserverHandler{
+		handler:  handler,
+		observer: observer,
+		groups:   []string{},
+		attrs:    []slog.Attr{},
+	}, err
 }
 
-// ObserverHandler constructor with default handler
-func NewDefaultObserverHandler(observer RecordCollector) (ObserverHandler, error) {
+// Constructor without handler argument.
+// An error is returned if the observer arg is nil.
+// Don't expect log output, the handler uses a io.Discard Writer.
+func NewDefaultObserverHandler(observer HandlerObserver) (ObserverHandler, error) {
 	h := slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})
 	return NewObserverHandler(h, observer)
 }
 
-func (h ObserverHandler) Enabled(ctx context.Context, level slog.Level) bool {
-	return h.Handler.Enabled(ctx, level)
+func (oh ObserverHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return oh.handler.Enabled(ctx, level)
 }
 
-func (h ObserverHandler) Handle(ctx context.Context, record slog.Record) error {
-	if err := h.Handler.Handle(ctx, record); err != nil {
+func (oh ObserverHandler) Handle(ctx context.Context, record slog.Record) error {
+	if err := oh.handler.Handle(ctx, record); err != nil {
 		return err
 	}
-	h.RecordCollector.addRecord(record)
+	oh.observer.addLog(record, oh.groups, oh.attrs)
 	return nil
 }
 
-func (h ObserverHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	h.Handler = h.Handler.WithAttrs(attrs)
-	return h
+// return a new ObserverHandler (after type assertion) with additional shared attributes
+func (oh ObserverHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+
+	newHandler := oh.handler.WithAttrs(attrs)
+
+	return ObserverHandler{
+		handler:  newHandler,
+		observer: oh.observer, // keep same observer with stored logs
+		groups:   oh.groups,
+		attrs:    append(oh.attrs, attrs...),
+	}
 }
 
-func (h ObserverHandler) WithGroup(name string) slog.Handler {
-	h.Handler = h.Handler.WithGroup(name)
-	return h
+// return a new ObserverHandler (after type assertion) with an additional group
+func (oh ObserverHandler) WithGroup(name string) slog.Handler {
+
+	// see slog.handler.go: func (h *commonHandler) withGroup(name string)
+	if name == "" {
+		return oh
+	}
+
+	newHandler := oh.handler.WithGroup(name)
+
+	return ObserverHandler{
+		handler:  newHandler,
+		observer: oh.observer, // keep same observer with stored logs
+		groups:   append(oh.groups, name),
+		attrs:    oh.attrs,
+	}
+}
+
+// getter for groups
+func (oh ObserverHandler) Groups() []string {
+	return oh.groups
+}
+
+// getter for attributes
+func (oh ObserverHandler) Atttributes() []slog.Attr {
+	return oh.attrs
+}
+
+// find an attribute by its Key
+// if not found, the returned attribute has a nil Value
+func (oh ObserverHandler) FindAttribute(key string) (attribute slog.Attr, found bool) {
+	return findAttribute(key, oh.attrs)
 }
