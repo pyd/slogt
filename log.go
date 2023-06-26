@@ -54,17 +54,16 @@ func (l Log) FindSharedAttribute(key string) (attribute slog.Attr, found bool) {
 	return l.handler.FindAttribute(key)
 }
 
-// Search for a built-in attribute (defined in Logger methods e.g. Warn()) by its key.
-// The key can be prefixed with handler groups but it is not a requirement.
+// Search for a built-in attribute by its key.
+// The key must not be prefixed with handler groups.
 func (l Log) FindBuiltInAttribute(key string) (attribute slog.Attr, found bool) {
-	return findAttribute(l.stripGroupNames(key), l.GetBuiltInAttributes())
+	return findAttribute(key, l.GetBuiltInAttributes())
 }
 
 // Get built-in attributes.
-// Note: attributes keys are not prefixed with handler groups.
 func (l Log) GetBuiltInAttributes() []slog.Attr {
 
-	// extract built-in attributes from record once
+	// extract built-in attributes from slog.Record once
 	// and store it for reuse
 	if len(l._builtInAttributes) == 0 {
 
@@ -81,18 +80,4 @@ func (l Log) GetBuiltInAttributes() []slog.Attr {
 // Names are separated by a dot e.g. "auth.admin".
 func (l Log) GroupNames() string {
 	return strings.Join(l.handler.Groups(), ".")
-}
-
-// remove group names (joined by a dot) at the start of the given key.
-// e.g. key = "app1.user.id" ang groups = ["app1"] will return "user.id".
-func (l Log) stripGroupNames(key string) string {
-
-	groups := joinKeys(l.handler.Groups())
-	index := strings.Index(key, groups)
-	if index == 0 {
-		// add one to remove the dot between app1 and user
-		key = key[len(groups)+1:]
-	}
-
-	return key
 }

@@ -15,10 +15,8 @@ import (
 /*
 Testing the slogt.Log struct.
 
-Note: GetBuilInAttributes() and  GetSharedAttributes() are implicitely tested
-TODO test log attributes from handler
+Note: GetBuilInAttributes() and  GetSharedAttributes() are implicitely tested by the finders tests.
 */
-
 var _ = Describe("The Log struct", func() {
 
 	var observer *slogt.Observer
@@ -106,12 +104,10 @@ var _ = Describe("The Log struct", func() {
 	DescribeTable("has a builtin attribute finder.",
 		func(key string, attributeFound bool, attributeValue slog.Value) {
 
-			logger = logger.WithGroup("app1")
 			logger.Error(
 				"error message",
 				slog.String("client", "frontend"),
 				slog.Group("request", slog.String("method", "POST"), slog.Bool("secured", true)),
-				slog.Group("user", slog.Group("profile", slog.Int("age", 22), slog.Bool("admin", true))),
 			)
 
 			log, logFound := observer.FindLog(1)
@@ -121,31 +117,17 @@ var _ = Describe("The Log struct", func() {
 			Expect(attrFound).To(Equal(attributeFound), fmt.Sprintf("attribute found should be %t", attributeFound))
 			Expect(attr.Value).To(Equal(attributeValue), fmt.Sprintf("attribute value should be %v", attributeValue))
 		},
-		// single attribute key (not group key)
-		Entry("single key exists, no groups", "client", true, slog.StringValue("frontend")),
+		Entry("there is an attribute matching this single key",
+			"client", true, slog.StringValue("frontend")),
 
-		Entry("single key exists, with groups exists", "app1.client", true, slog.StringValue("frontend")),
+		Entry("there is no attribute matching this single key",
+			"unknownkey", false, slog.AnyValue(nil)),
 
-		Entry("single key exists, with groups does not exist", "unknowngroups.client", false, slog.AnyValue(nil)),
+		Entry("there is an attribute matching this group key",
+			"request.method", true, slog.StringValue("POST")),
 
-		Entry("single key does not exist, no groups", "unknown", false, slog.AnyValue(nil)),
-
-		Entry("single key does not exist, with groups exists", "app1.unknown", false, slog.AnyValue(nil)),
-
-		Entry("single key does not exist, with groups does not exist", "unknowngroups.unknown", false, slog.AnyValue(nil)),
-
-		// group attribute key
-		Entry("group key exists, no groups", "user.profile.age", true, slog.IntValue(22)),
-
-		Entry("group key exists, with groups exists", "app1.user.profile.age", true, slog.IntValue(22)),
-
-		Entry("group key exists, with groups does not exist", "unknowngroups.user.profile.age", false, slog.AnyValue(nil)),
-
-		Entry("group key does not exist, no groups", "user.profile.unknown", false, slog.AnyValue(nil)),
-
-		Entry("group key does not exist, with groups exists", "app1.user.unknown.age", false, slog.AnyValue(nil)),
-
-		Entry("group key does not exist, with groups does not exist", "unknowngroups.unknown.profile.age", false, slog.AnyValue(nil)),
+		Entry("there is no attribute matching this group key",
+			"request.path", false, slog.AnyValue(nil)),
 	)
 
 	Describe("provides a getter for group names.", func() {

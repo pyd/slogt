@@ -56,8 +56,3 @@ ext:
 func splitKey(key string) []string {
 	return strings.Split(key, ".")
 }
-
-// join attribute subkeys with "."
-func joinKeys(keys []string) string {
-	return strings.Join(keys, ".")
-}
