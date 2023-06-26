@@ -31,3 +31,8 @@ func (o *Observer) FindLog(index int) (log Log, found bool) {
 func (o *Observer) ClearLogs() {
 	o.logs = []Log{}
 }
+
+// Get all captured logs.
+func (o *Observer) Logs() []Log {
+	return o.logs
+}

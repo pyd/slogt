@@ -1,4 +1,3 @@
-
 # slogt
 
 Test logs from golang slog logger.
@@ -7,8 +6,7 @@ SLOG DESIGN SOURCE: https://go.googlesource.com/proposal/+/master/design/56345-s
 
 
 ## Observer
-// TODO add a method to find a log wwhicn has an attribute (by its Key)
-// TODO at least provide a getter for all logs so user can custom filter them
+// TODO add a method to find a log whicn has an attribute (by its Key)
 
 // TODO move handler arg to second pos in NewObserverHandler
 

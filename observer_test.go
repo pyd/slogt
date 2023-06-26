@@ -23,7 +23,7 @@ var _ = Describe("The log observer", func() {
 		logger = slog.New(handler)
 	})
 
-	Describe("Provides a log counter", func() {
+	Describe("provides a log counter.", func() {
 
 		When("no log was captured", func() {
 
@@ -47,7 +47,7 @@ var _ = Describe("The log observer", func() {
 		})
 	})
 
-	Describe("Can return a log by it's chronological index", func() {
+	Describe("can find a log by it's chronological index", func() {
 
 		var log slogt.Log
 		var logFound bool
@@ -57,7 +57,7 @@ var _ = Describe("The log observer", func() {
 			logger.Error("error message 2")
 		})
 
-		When("the index does not exist", func() {
+		When("there is no log with this index", func() {
 
 			BeforeEach(func() {
 				log, logFound = observer.FindLog(99)
@@ -73,7 +73,7 @@ var _ = Describe("The log observer", func() {
 
 		})
 
-		When("the index does exist", func() {
+		When("there is a log with this index", func() {
 
 			BeforeEach(func() {
 				log, logFound = observer.FindLog(2)
@@ -100,6 +100,44 @@ var _ = Describe("The log observer", func() {
 		It("should return a count of 0", func() {
 			observer.ClearLogs()
 			Expect(observer.CountLogs()).To(Equal(0))
+		})
+	})
+
+	Describe("provides a getter for all logs", func() {
+
+		var logs []slogt.Log
+
+		JustBeforeEach(func() {
+			logs = observer.Logs()
+		})
+
+		When("several logs were captured", func() {
+
+			BeforeEach(func() {
+				logger.Info("info message")
+				logger.Warn("warn message")
+			})
+
+			It("should return the expected number of logs", func() {
+				Expect(logs).To(HaveLen(2))
+			})
+
+			It("should return the expected logs", func() {
+				log1, log1Found := observer.FindLog(1)
+				Expect(log1Found).To(BeTrue())
+				Expect(log1.Level()).To(Equal(slog.LevelInfo))
+
+				log2, log2Found := observer.FindLog(2)
+				Expect(log2Found).To(BeTrue())
+				Expect(log2.Level()).To(Equal(slog.LevelWarn))
+			})
+		})
+
+		When("no log was captured", func() {
+
+			It("should return no logs", func() {
+				Expect(logs).To(BeEmpty())
+			})
 		})
 	})
 
