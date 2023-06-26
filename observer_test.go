@@ -89,4 +89,18 @@ var _ = Describe("The log observer", func() {
 		})
 	})
 
+	Describe("can clear all stored logs", func() {
+
+		BeforeEach(func() {
+			logger.Info("info message")
+			logger.Warn("warn message")
+			Expect(observer.CountLogs()).To(Equal(2))
+		})
+
+		It("should return a count of 0", func() {
+			observer.ClearLogs()
+			Expect(observer.CountLogs()).To(Equal(0))
+		})
+	})
+
 })

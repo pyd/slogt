@@ -56,7 +56,7 @@ func (l Log) FindSharedAttribute(key string) (attribute slog.Attr, found bool) {
 
 // Search for a built-in attribute (defined in Logger methods e.g. Warn()) by its key.
 // The key can be prefixed with handler groups but it is not a requirement.
-func (l Log) FindAttribute(key string) (attribute slog.Attr, found bool) {
+func (l Log) FindBuiltInAttribute(key string) (attribute slog.Attr, found bool) {
 	return findAttribute(l.stripGroupNames(key), l.GetBuiltInAttributes())
 }
 

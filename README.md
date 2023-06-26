@@ -5,11 +5,15 @@ Test logs from golang slog logger.
 
 SLOG DESIGN SOURCE: https://go.googlesource.com/proposal/+/master/design/56345-structured-logging.md
 
+## Notes
 WARNING: slogt will fail finding an attribute if its Key has a dot e.g. "user.profil"
 as it will consider it a 2 subkeys key !!!!
 A solution could be to provide a SetAttributeKeySeparator(separator string)
 
-// TODO add a method to clear logs in observer
+## Observer
+// TODO add a method to find a log wwhicn has an attribute (by its Key)
+// TODO at least provide a getter for all logs so user can custom filter them
+
 
 // TODO find a log by its - chronological - index may be difficult?
  

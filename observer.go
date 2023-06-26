@@ -26,3 +26,8 @@ func (o *Observer) FindLog(index int) (log Log, found bool) {
 	}
 	return log, found
 }
+
+// Remove all captured logs.
+func (o *Observer) ClearLogs() {
+	o.logs = []Log{}
+}
