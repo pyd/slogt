@@ -52,17 +52,20 @@ func (l Log) Level() slog.Level {
 	return l.record.Level
 }
 
-// search for a attribute shared by all logs (for a given logger and handler)
-// shared attributes are defined by a slog.Logger or a slog.Handler
+// Search for a shared attribute (defined at logger or handler level) by its key.
+// Note: shared attributes are not prefixed with handler groups.
 func (l Log) FindSharedAttribute(key string) (attribute slog.Attr, found bool) {
 	return findAttribute(key, l.sharedAttributes)
 }
 
+// Search for a built-in attribute (defined in Logger methods e.g. Warn()) by its key.
+// the key can be prefixed with handler groups but it is not a requirement
 func (l Log) FindBuiltInAttribute(key string) (attribute slog.Attr, found bool) {
 	return findAttribute(l.stripGroupNames(key), l.GetBuiltInAttributes())
 }
 
-// return built-in attributes
+// Get built-in attributes.
+// Note: attributes keys are not prefixed with handler groups
 func (l Log) GetBuiltInAttributes() []slog.Attr {
 
 	// extract built-in attributes from record once
@@ -78,78 +81,8 @@ func (l Log) GetBuiltInAttributes() []slog.Attr {
 	return l._builtInAttributes
 }
 
-// return group names defined by a logger and/or a handler
-// names are separated by a dot e.g. "auth.admin"
+// Get groups from the handler for this log.
+// Names are separated by a dot e.g. "auth.admin".
 func (l Log) GroupNames() string {
 	return strings.Join(l.groups, ".")
-}
-
-// find an attribute by its Key in attributes
-func findAttribute(key string, attributes []slog.Attr) (attribute slog.Attr, found bool) {
-
-	subkeys := splitKey(key)
-
-ext:
-	for {
-		// search in attributes for a match with first item in subkeys
-		// if found, subkeys is shifted to the left and the attribute Value - if a group - becomes attributes
-
-		subkey := subkeys[0]
-		subkeyAttrFound := false
-		isLastSubkey := len(subkeys) == 1
-
-		for _, attr := range attributes {
-
-			if attr.Key == subkey {
-
-				subkeyAttrFound = true
-
-				if isLastSubkey {
-					found = true
-					attribute = attr
-					break ext
-				}
-
-				// make sure found attribute is a group to continue
-				if attr.Value.Kind() == slog.KindGroup {
-					// update attributes and subkeys for next loop
-					attributes = attr.Value.Group()
-					subkeys = subkeys[1:]
-				} else {
-					break ext
-				}
-			}
-		}
-
-		if !subkeyAttrFound {
-			break
-		}
-
-	}
-
-	return attribute, found
-}
-
-// remove group names (joined by a dot) at the start of the given key
-// e.g. key = "app1.user.id" ang groups = ["app1"] will return "user.id"
-func (l Log) stripGroupNames(key string) string {
-
-	groups := joinKeys(l.groups)
-	index := strings.Index(key, groups)
-	if index == 0 {
-		// add one to remove the dot between app1 and user
-		key = key[len(groups)+1:]
-	}
-
-	return key
-}
-
-// split an attribute key with "."
-func splitKey(key string) []string {
-	return strings.Split(key, ".")
-}
-
-// join attribute subkeys with "."
-func joinKeys(keys []string) string {
-	return strings.Join(keys, ".")
 }
