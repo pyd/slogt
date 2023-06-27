@@ -18,7 +18,7 @@ func (o *Observer) CountLogs() int {
 }
 
 // Find a log by its chronological index.
-// if not found a zero-ed Log is returned
+// If not found a zero-ed Log is returned.
 func (o *Observer) FindLog(index int) (log Log, found bool) {
 	if index <= len(o.logs) {
 		found = true

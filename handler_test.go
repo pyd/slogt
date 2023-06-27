@@ -20,7 +20,7 @@ Check that the WithGroup() method captures groups is implicit: see Log tests
 
 var _ = Describe("Observer Handler", func() {
 
-	// 2 constructors: NewObserverHandler(handler, observer) & NewDefaultObserverHandler(observer)
+	// 2 constructors: NewObserverHandler(observer, handler) & NewDefaultObserverHandler(observer)
 	Describe("has 2 constructors.", func() {
 
 		var handlerArg slog.Handler
@@ -37,7 +37,7 @@ var _ = Describe("Observer Handler", func() {
 		Context("One requires a handler and an observer arguments", func() {
 
 			JustBeforeEach(func() {
-				_, constructorErr = slogt.NewObserverHandler(handlerArg, observerArg)
+				_, constructorErr = slogt.NewObserverHandler(observerArg, handlerArg)
 			})
 
 			When("the handler argument is nil", func() {

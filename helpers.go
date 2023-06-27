@@ -6,7 +6,8 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-// search for an attribute matching the given key
+// Search for an attribute matching the given key.
+// For group attributes, sub keys must be separated by a dot.
 func findAttribute(key string, attributes []slog.Attr) (attribute slog.Attr, found bool) {
 
 	subkeys := splitKey(key)
@@ -52,7 +53,7 @@ ext:
 	return attribute, found
 }
 
-// split an attribute key with "."
+// Split an attribute key with ".".
 func splitKey(key string) []string {
 	return strings.Split(key, ".")
 }

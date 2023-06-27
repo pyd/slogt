@@ -36,7 +36,7 @@ type ObserverHandler struct {
 
 // Constructor
 // An error is returned if the handler or observer arg is nil.
-func NewObserverHandler(handler slog.Handler, observer HandlerObserver) (ObserverHandler, error) {
+func NewObserverHandler(observer HandlerObserver, handler slog.Handler) (ObserverHandler, error) {
 	var err error
 	if handler == nil {
 		err = errors.New("handler passed to ObserverHandler constructor can not be nil")
@@ -55,8 +55,8 @@ func NewObserverHandler(handler slog.Handler, observer HandlerObserver) (Observe
 // An error is returned if the observer arg is nil.
 // Don't expect log output, the handler uses a io.Discard Writer.
 func NewDefaultObserverHandler(observer HandlerObserver) (ObserverHandler, error) {
-	h := slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})
-	return NewObserverHandler(h, observer)
+	handler := slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})
+	return NewObserverHandler(observer, handler)
 }
 
 func (oh ObserverHandler) Enabled(ctx context.Context, level slog.Level) bool {
@@ -72,7 +72,7 @@ func (oh ObserverHandler) Handle(ctx context.Context, record slog.Record) error 
 	return nil
 }
 
-// return a new ObserverHandler (type assertion) with additional shared attributes
+// Get a new ObserverHandler (type assertion) with additional shared attributes.
 func (oh ObserverHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 
 	newHandler := oh.handler.WithAttrs(attrs)
@@ -85,7 +85,7 @@ func (oh ObserverHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 }
 
-// return a new ObserverHandler (type assertion) with an additional group
+// Get a new ObserverHandler (type assertion) with an additional group.
 func (oh ObserverHandler) WithGroup(name string) slog.Handler {
 
 	// see slog.handler.go: func (h *commonHandler) withGroup(name string)
@@ -103,18 +103,18 @@ func (oh ObserverHandler) WithGroup(name string) slog.Handler {
 	}
 }
 
-// getter for groups
+// Get this handlers's groups.
 func (oh ObserverHandler) Groups() []string {
 	return oh.groups
 }
 
-// getter for attributes
+// Get this handlers's attributes.
 func (oh ObserverHandler) Atttributes() []slog.Attr {
 	return oh.attrs
 }
 
-// find an attribute by its Key
-// if not found, the returned attribute has a nil Value
+// Search fr an attribute by its Key in this handler's attributes.
+// If not found, the returned attribute has a nil Value.
 func (oh ObserverHandler) FindAttribute(key string) (attribute slog.Attr, found bool) {
 	return findAttribute(key, oh.attrs)
 }
